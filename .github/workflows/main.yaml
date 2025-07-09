@@ -47,25 +47,11 @@ jobs:
             cluster: dev-fss
             azure_ad_group: "a17bb6c9-26d3-451b-b22b-4134b72669ec" # nais-team-pensjon-q0-innlogging
 
-         -  name: pensjon-psak-proxy-q0
-            namespace: pensjon-q0
-            ingress: https://pensjon-psak-q0.intern.dev.nav.no
-            remote: http://pensjon-psak-q0.pensjon-q0
-            cluster: dev-gcp
-            azure_ad_group: "a17bb6c9-26d3-451b-b22b-4134b72669ec" # nais-team-pensjon-q0-innlogging
-
          -  name: pensjon-psak-proxy-q1
             namespace: pensjon-q1
             ingress: https://pensjon-psak-q1.nais.preprod.local
             remote: http://pensjon-psak-q1.pensjon-q1.svc.nais.local
             cluster: dev-fss
-            azure_ad_group: "b90bfc98-bfc1-44d8-81fb-f7dfbb77d062" # nais-team-pensjon-q1-innlogging
-
-         -  name: pensjon-psak-proxy-q1
-            namespace: pensjon-q1
-            ingress: https://pensjon-psak-q1.intern.dev.nav.no
-            remote: http://pensjon-psak-q1.pensjon-q1
-            cluster: dev-gcp
             azure_ad_group: "b90bfc98-bfc1-44d8-81fb-f7dfbb77d062" # nais-team-pensjon-q1-innlogging
 
          -  name: pensjon-psak-proxy-q2
@@ -75,13 +61,6 @@ jobs:
             cluster: dev-fss
             azure_ad_group: "6ecb30ca-93c0-41bb-8e7c-4ce5897d7025" # Teampensjon
 
-         - name: pensjon-psak-proxy-q2
-           namespace: pensjon-q2
-           ingress: https://pensjon-psak-proxy-q2.intern.dev.nav.no
-           remote: http://pensjon-psak-q2.pensjon-q2
-           cluster: dev-gcp
-           azure_ad_group: "6ecb30ca-93c0-41bb-8e7c-4ce5897d7025" # Teampensjon
-
          -  name: pensjon-psak-proxy-q5
             namespace: pensjon-q5
             ingress: https://pensjon-psak-q5.nais.preprod.local
@@ -89,12 +68,6 @@ jobs:
             cluster: dev-fss
             azure_ad_group: "8179b33b-87db-41b9-9505-e063c2b4737b" # nais-team-pensjon-q5-innlogging
 
-         - name: pensjon-psak-proxy-q5
-           namespace: pensjon-q5
-           ingress: https://pensjon-psak-q5.intern.dev.nav.no
-           remote: http://pensjon-psak-q5.pensjon-q5
-           cluster: dev-gcp
-           azure_ad_group: "8179b33b-87db-41b9-9505-e063c2b4737b" # nais-team-pensjon-q5-innlogging
     steps:
       - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
