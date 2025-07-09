@@ -5,15 +5,11 @@ management:
         include: health,prometheus
 
 spring:
-  cloud:
-    gateway:
-      routes:
-      - id: app
-        uri: ${REMOTE}
-        predicates:
-        - Path=/**
-        filters:
-          - PreserveHostHeader
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+
   security:
     oauth2:
       client:
