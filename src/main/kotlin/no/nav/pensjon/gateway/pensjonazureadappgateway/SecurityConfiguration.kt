@@ -43,6 +43,7 @@ class SecurityConfiguration {
         http.csrf { it.disable() }
         http.authorizeExchange { authorize: ServerHttpSecurity.AuthorizeExchangeSpec ->
             authorize
+                .pathMatchers("/psak/internal/selftest").permitAll()
                 .pathMatchers("/actuator/health/**").permitAll()
                 .pathMatchers("/actuator/prometheus/**").permitAll()
                 .anyExchange().authenticated()
