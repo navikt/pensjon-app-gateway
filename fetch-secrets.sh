@@ -3,8 +3,8 @@
 name=pensjon-psak-proxy-q2
 namespace=pensjon-q2
 cluster=dev-fss
-#remote=http://localhost:9080
-remote=https://pensjon-psak-q2.dev.adeo.no
+remote=http://localhost:9080
+#remote=http://pensjon-psak-q2.ansatt.dev.nav.no
 
 envfile=.env
 
