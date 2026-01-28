@@ -1,3 +1,8 @@
-FROM ghcr.io/navikt/baseimages/temurin:17
+FROM gcr.io/distroless/java21-debian12:nonroot
 
-COPY target/pensjon-app-gateway-*.jar app.jar
+ENV TZ="Europe/Oslo"
+
+COPY target/pensjon-app-gateway-*.jar /app/app.jar
+WORKDIR /app
+
+CMD ["app.jar"]

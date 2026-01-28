@@ -49,4 +49,6 @@ spec:
   env:
     - name: "REMOTE"
       value: "{{{ remote }}}"
+    - name: "JDK_JAVA_OPTIONS"
+      value: "$(JAVA_PROXY_OPTIONS)"
   webproxy: true

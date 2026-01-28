@@ -3,32 +3,30 @@ on:
   push:
     branches:
       - "main"
-env:
-  IMAGE: "ghcr.io/${{ github.repository }}:${{ github.sha }}"
 jobs:
   build:
     name: "build"
     permissions:
       contents: "read"
+      id-token: "write"
       packages: "write"
     runs-on: "ubuntu-latest"
+    outputs:
+      image: "${{ steps.docker-push.outputs.image }}"
+      telemetry: "${{ steps.docker-push.outputs.telemetry }}"
     steps:
       - uses: "actions/checkout@v3"
       - uses: "actions/setup-java@v3"
         with:
-          java-version: "17"
+          java-version: "21"
           distribution: 'temurin'
           cache: "maven"
       - name: "compile and run tests"
         run: "mvn package"
-      - name: "Login to GitHub Docker Registry"
-        uses: "docker/login-action@v2"
+      - uses: nais/docker-build-push@v0
+        id: docker-push
         with:
-          registry: "ghcr.io"
-          username: "${{ github.actor }}"
-          password: "${{ secrets.GITHUB_TOKEN }}"
-      - name: "Build and push the Docker image"
-        run: "docker build --pull --tag ${IMAGE} . && docker push ${IMAGE}"
+          team: pensjon-q1
 
   deploy:
     name: "Deploy to nais"
@@ -49,25 +47,11 @@ jobs:
             cluster: dev-fss
             azure_ad_group: "a17bb6c9-26d3-451b-b22b-4134b72669ec" # nais-team-pensjon-q0-innlogging
 
-         -  name: pensjon-psak-proxy-q0
-            namespace: pensjon-q0
-            ingress: https://pensjon-psak-q0.intern.dev.nav.no
-            remote: http://pensjon-psak-q0.pensjon-q0
-            cluster: dev-gcp
-            azure_ad_group: "a17bb6c9-26d3-451b-b22b-4134b72669ec" # nais-team-pensjon-q0-innlogging
-
          -  name: pensjon-psak-proxy-q1
             namespace: pensjon-q1
             ingress: https://pensjon-psak-q1.nais.preprod.local
             remote: http://pensjon-psak-q1.pensjon-q1.svc.nais.local
             cluster: dev-fss
-            azure_ad_group: "b90bfc98-bfc1-44d8-81fb-f7dfbb77d062" # nais-team-pensjon-q1-innlogging
-
-         -  name: pensjon-psak-proxy-q1
-            namespace: pensjon-q1
-            ingress: https://pensjon-psak-q1.intern.dev.nav.no
-            remote: http://pensjon-psak-q1.pensjon-q1
-            cluster: dev-gcp
             azure_ad_group: "b90bfc98-bfc1-44d8-81fb-f7dfbb77d062" # nais-team-pensjon-q1-innlogging
 
          -  name: pensjon-psak-proxy-q2
@@ -77,13 +61,6 @@ jobs:
             cluster: dev-fss
             azure_ad_group: "6ecb30ca-93c0-41bb-8e7c-4ce5897d7025" # Teampensjon
 
-         - name: pensjon-psak-proxy-q2
-           namespace: pensjon-q2
-           ingress: https://pensjon-psak-proxy-q2.intern.dev.nav.no
-           remote: http://pensjon-psak-q2.pensjon-q2
-           cluster: dev-gcp
-           azure_ad_group: "6ecb30ca-93c0-41bb-8e7c-4ce5897d7025" # Teampensjon
-
          -  name: pensjon-psak-proxy-q5
             namespace: pensjon-q5
             ingress: https://pensjon-psak-q5.nais.preprod.local
@@ -91,17 +68,13 @@ jobs:
             cluster: dev-fss
             azure_ad_group: "8179b33b-87db-41b9-9505-e063c2b4737b" # nais-team-pensjon-q5-innlogging
 
-         - name: pensjon-psak-proxy-q5
-           namespace: pensjon-q5
-           ingress: https://pensjon-psak-q5.intern.dev.nav.no
-           remote: http://pensjon-psak-q5.pensjon-q5
-           cluster: dev-gcp
-           azure_ad_group: "8179b33b-87db-41b9-9505-e063c2b4737b" # nais-team-pensjon-q5-innlogging
     steps:
       - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
         name: "Deploy to NAIS"
         env:
-          RESOURCE: .nais/nais.yaml
           CLUSTER: "${{ matrix.cluster }}"
+          IMAGE: "${{ needs.build.outputs.image }}"
+          RESOURCE: .nais/nais.yaml
+          TELEMETRY: ${{ needs.build.outputs.telemetry }}
           VAR: remote=${{ matrix.remote }},ingress=${{ matrix.ingress }},azure_ad_group=${{ matrix.azure_ad_group }},name=${{ matrix.name }},namespace=${{ matrix.namespace }}
