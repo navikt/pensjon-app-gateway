@@ -44,7 +44,7 @@ jobs:
             ingress: https://pensjon-psak-proxy-q2.intern.dev.nav.no
             remote: http://pensjon-psak-q2.pensjon-q2
             cluster: dev-gcp
-            azure_ad_group: "6ecb30ca-93c0-41bb-8e7c-4ce5897d7025" # Teampensjon
+#            azure_ad_group: "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf" # Pensjon Saksbehandler
     steps:
       - uses: actions/checkout@v4
       - uses: nais/deploy/actions/deploy@v2
@@ -54,4 +54,4 @@ jobs:
           IMAGE: "${{ needs.build.outputs.image }}"
           RESOURCE: .nais/nais-q2.yaml
           TELEMETRY: ${{ needs.build.outputs.telemetry }}
-          VAR: remote=${{ matrix.remote }},ingress=${{ matrix.ingress }},azure_ad_group=${{ matrix.azure_ad_group }},name=${{ matrix.name }},namespace=${{ matrix.namespace }}
+          VAR: remote=${{ matrix.remote }},ingress=${{ matrix.ingress }},name=${{ matrix.name }},namespace=${{ matrix.namespace }}
