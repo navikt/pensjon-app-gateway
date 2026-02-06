@@ -29,7 +29,7 @@ jobs:
           team: pensjon-q1
 
   deploy:
-    name: "Deploy to nais"
+    name: "Deploy to nais q0, q1 and q5"
     permissions:
       contents: "read"
       id-token: "write" 
@@ -54,12 +54,12 @@ jobs:
             cluster: dev-fss
             azure_ad_group: "b90bfc98-bfc1-44d8-81fb-f7dfbb77d062" # nais-team-pensjon-q1-innlogging
 
-         -  name: pensjon-psak-proxy-q2
-            namespace: pensjon-q2
-            ingress: https://pensjon-psak-proxy-q2.dev.intern.nav.no
-            remote: http://pensjon-psak-q2.pensjon-q2.svc.nais.local
-            cluster: dev-fss
-            azure_ad_group: "6ecb30ca-93c0-41bb-8e7c-4ce5897d7025" # Teampensjon
+#         -  name: pensjon-psak-proxy-q2
+#            namespace: pensjon-q2
+#            ingress: https://pensjon-psak-proxy-q2.dev.intern.nav.no
+#            remote: http://pensjon-psak-q2.pensjon-q2.svc.nais.local
+#            cluster: dev-fss
+#            azure_ad_group: "6ecb30ca-93c0-41bb-8e7c-4ce5897d7025" # Teampensjon
 
          -  name: pensjon-psak-proxy-q5
             namespace: pensjon-q5
