@@ -1,0 +1,57 @@
+name: "Build and deploy pensjon-azuread-app-gateway to q2"
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: "build"
+    permissions:
+      contents: "read"
+      id-token: "write"
+      packages: "write"
+    runs-on: "ubuntu-latest"
+    outputs:
+      image: "${{ steps.docker-push.outputs.image }}"
+      telemetry: "${{ steps.docker-push.outputs.telemetry }}"
+    steps:
+      - uses: "actions/checkout@v3"
+      - uses: "actions/setup-java@v3"
+        with:
+          java-version: "21"
+          distribution: 'temurin'
+          cache: "maven"
+      - name: "compile and run tests"
+        run: "mvn package"
+      - uses: nais/docker-build-push@v0
+        id: docker-push
+        with:
+          team: pensjon-q2
+
+  deploy:
+    name: "Deploy to nais gcp"
+    permissions:
+      contents: "read"
+      id-token: "write" 
+    needs: "build"
+    runs-on: "ubuntu-latest"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+         -  name: pensjon-psak-proxy-q2
+            namespace: pensjon-q2
+            ingress: https://pensjon-psak-proxy-q2.intern.dev.nav.no
+            remote: http://pensjon-psak-q2.pensjon-q2
+            cluster: dev-gcp
+            azure_ad_group: "6ecb30ca-93c0-41bb-8e7c-4ce5897d7025" # Teampensjon
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        name: "Deploy to NAIS"
+        env:
+          CLUSTER: "${{ matrix.cluster }}"
+          IMAGE: "${{ needs.build.outputs.image }}"
+          RESOURCE: .nais/nais-q2.yaml
+          TELEMETRY: ${{ needs.build.outputs.telemetry }}
+          VAR: remote=${{ matrix.remote }},ingress=${{ matrix.ingress }},azure_ad_group=${{ matrix.azure_ad_group }},name=${{ matrix.name }},namespace=${{ matrix.namespace }}

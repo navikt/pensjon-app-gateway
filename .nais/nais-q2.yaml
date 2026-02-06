@@ -1,0 +1,66 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "{{{ name }}}"
+  namespace: "{{{ namespace }}}"
+  labels:
+    "team": "{{{ namespace }}}"
+spec:
+  image: {{image}}
+  liveness:
+    path: "/actuator/health/liveness"
+    initialDelay: 10
+  readiness:
+    path: "/actuator/health/readiness"
+    initialDelay: 10
+  startup:
+    path: "/actuator/health/readiness"
+    initialDelay: 20
+    failureThreshold: 100
+    periodSeconds: 1
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 50
+  prometheus:
+    enabled: true
+    path: "/actuator/prometheus"
+  resources:
+    limits:
+      memory: "512Mi"
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+  ingresses:
+    - "{{{ ingress }}}"
+  accessPolicy:
+    outbound:
+      rules:
+        - application: pensjon-psak-q2
+          namespace: pensjon-q2
+          cluster: dev-gcp
+        - application: pensjon-jit-for-q
+          namespace: pensjon-saksbehandling
+          cluster: dev-gcp
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: false
+      claims:
+        groups:
+          - id: "{{{ azure_ad_group }}}"
+        extra:
+          - "NAVident"
+      tenant: nav.no
+      replyURLs:
+        - "{{{ ingress }}}/login/oauth2/code/azuread"
+        - "http://localhost:9080/login/oauth2/code/azuread"
+  env:
+    - name: "REMOTE"
+      value: "{{{ remote }}}"
+    - name: "JDK_JAVA_OPTIONS"
+      value: "$(JAVA_PROXY_OPTIONS)"
+    - name: PENSJON-JIT-FOR-Q_URL
+      value: http://pensjon-jit-for-q.pensjon-saksbehandling
+    - name: PENSJON-JIT-FOR-Q_SCOPE
+      value: api://dev-gcp.pensjon-saksbehandling.pensjon-jit-for-q/.default
