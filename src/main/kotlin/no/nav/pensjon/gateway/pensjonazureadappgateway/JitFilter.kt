@@ -10,8 +10,6 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.stereotype.Component
-import org.springframework.util.LinkedMultiValueMap
-import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
@@ -54,16 +52,16 @@ class JitFilter(
     private fun exchangeToken(userToken: String): Mono<String> {
         logger.info("Exchanging token for JIT API access")
 
-        val formData = LinkedMultiValueMap<String, String>().apply {
-            add("identity_provider", "entra_id")
-            add("target", jitApiScope)
-            add("user_token", userToken)
-        }
+        val requestBody = mapOf(
+            "identity_provider" to "entra_id",
+            "target" to jitApiScope,
+            "user_token" to userToken
+        )
 
         return webClient.post()
             .uri(tokenExchangeEndpoint)
-            .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-            .body(BodyInserters.fromFormData(formData))
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(requestBody)
             .retrieve()
             .bodyToMono(TokenResponse::class.java)
             .map { it.access_token }
@@ -77,7 +75,7 @@ class JitFilter(
             .header("Authorization", "Bearer $accessToken")
             .bodyValue(
                 mapOf(
-                    "environment" to "dev",
+                    "environment" to "Q2",
                     "startTime" to LocalDateTime.now().toString(),
                     "durationInHours" to "2",
                     "reason" to "Tester lagring JIT-opplysninger for pensjon-app-gateway",
