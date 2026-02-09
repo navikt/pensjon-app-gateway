@@ -2,7 +2,7 @@
 
 name=pensjon-psak-proxy-q2
 namespace=pensjon-q2
-cluster=dev-fss
+cluster=dev-gcp
 remote=http://localhost:9080
 #remote=http://pensjon-psak-q2.ansatt.dev.nav.no
 
@@ -86,6 +86,9 @@ fetch_kubernetes_secrets "AzureAD" "${cluster}" "${namespace}" "${name}" "strict
 echo
 
 echo "REMOTE='${remote}'" >> "${envfile}"
+echo "PENSJON-JIT-FOR-Q_URL='https://pensjon-jit-for-q.intern.dev.nav.no'" >> "${envfile}"
+echo "PENSJON-JIT-FOR-Q_SCOPE='api://dev-gcp.pensjon-saksbehandling.pensjon-jit-for-q/.default'" >> "${envfile}"
+echo "NAIS_TOKEN_EXCHANGE_ENDPOINT='http://127.0.0.1:7164/api/v1/token/exchange'" >> "${envfile}"
 
 echo
 

@@ -48,18 +48,16 @@ spec:
       allowAllUsers: false
       claims:
         groups:
-          - id: "{{{ azure_ad_group }}}"
+          - id: "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf"  # 0000-GA-PENSJON_SAKSBEHANDLER
         extra:
           - "NAVident"
-      tenant: nav.no
+      tenant: trygdeetaten.no
       replyURLs:
         - "{{{ ingress }}}/login/oauth2/code/azuread"
         - "http://localhost:9080/login/oauth2/code/azuread"
   env:
     - name: "REMOTE"
       value: "{{{ remote }}}"
-    - name: "JDK_JAVA_OPTIONS"
-      value: "$(JAVA_PROXY_OPTIONS)"
     - name: PENSJON-JIT-FOR-Q_URL
       value: http://pensjon-jit-for-q.pensjon-saksbehandling
     - name: PENSJON-JIT-FOR-Q_SCOPE

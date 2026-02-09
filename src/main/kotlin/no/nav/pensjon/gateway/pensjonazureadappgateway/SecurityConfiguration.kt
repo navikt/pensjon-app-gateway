@@ -88,6 +88,9 @@ class SecurityConfiguration {
     }
 
     @Bean
+    fun webClient(): WebClient = webClientProxy()
+
+    @Bean
     fun reactiveJwtDecoder(
         @Value("\${AZURE_APP_CLIENT_ID}") clientId: String,
         @Value("\${AZURE_OPENID_CONFIG_ISSUER}") issuer: String,
