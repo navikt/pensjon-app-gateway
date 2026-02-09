@@ -7,8 +7,9 @@ import org.springframework.cloud.gateway.filter.GatewayFilter
 import org.springframework.cloud.gateway.filter.GatewayFilterChain
 import org.springframework.http.MediaType
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken
-import org.springframework.security.oauth2.core.oidc.user.OidcUser
+import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.server.ServerWebExchange
@@ -20,7 +21,8 @@ class JitFilter(
     @Value("\${PENSJON-JIT-FOR-Q_URL}") private val jitApiUrl: String,
     @Value("\${PENSJON-JIT-FOR-Q_SCOPE}") private val jitApiScope: String,
     @Value("\${NAIS_TOKEN_EXCHANGE_ENDPOINT}") private val tokenExchangeEndpoint: String,
-    private val webClient: WebClient
+    private val webClient: WebClient,
+    private val authorizedClientRepository: ServerOAuth2AuthorizedClientRepository
 ) : GatewayFilter {
 
     private val logger: Logger = getLogger(javaClass)
@@ -29,18 +31,22 @@ class JitFilter(
         logger.info("Calling JIT API at {}", jitApiUrl)
 
         return ReactiveSecurityContextHolder.getContext()
-            .flatMap { securityContext ->
-                val authentication = securityContext.authentication
-                if (authentication is OAuth2AuthenticationToken && authentication.principal is OidcUser) {
-                    val oidcUser = authentication.principal as OidcUser
-                    val userToken = oidcUser.idToken.tokenValue
-                    exchangeToken(userToken)
-                } else {
-                    Mono.error(IllegalStateException("No valid OIDC user token found"))
-                }
+            .map { it.authentication }
+            .filter { it is OAuth2AuthenticationToken }
+            .cast(OAuth2AuthenticationToken::class.java)
+            .flatMap { authentication ->
+                authorizedClientRepository.loadAuthorizedClient<OAuth2AuthorizedClient>(
+                    authentication.authorizedClientRegistrationId,
+                    authentication,
+                    exchange
+                )
             }
+            .map { authorizedClient -> authorizedClient.accessToken.tokenValue }
             .flatMap { accessToken ->
-                callJitApi(accessToken)
+                exchangeToken(accessToken)
+            }
+            .flatMap { oboToken ->
+                callJitApi(oboToken)
             }
             .then(chain.filter(exchange))
             .onErrorResume { error ->
