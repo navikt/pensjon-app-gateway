@@ -57,8 +57,10 @@ spec:
       value: dummy
     - name: PENSJON-JIT-FOR-Q_SCOPE
       value: dummy
+{{#if enable_webproxy}}
     - name: "JDK_JAVA_OPTIONS"
       value: "$(JAVA_PROXY_OPTIONS)"
+{{/if}}
 {{#if enable_webproxy}}
   webproxy: true
 {{/if}}
