@@ -54,6 +54,13 @@ jobs:
             cluster: dev-fss
             azure_ad_group: "b90bfc98-bfc1-44d8-81fb-f7dfbb77d062" # nais-team-pensjon-q1-innlogging
 
+         -  name: pensjon-psak-proxy-q1
+            namespace: pensjon-q1
+            ingress: https://pensjon-psak-q1.intern.dev.nav.no
+            remote: http://pensjon-psak-q1.pensjon-q1
+            cluster: gcp
+            azure_ad_group: "b90bfc98-bfc1-44d8-81fb-f7dfbb77d062" # nais-team-pensjon-q1-innlogging
+
 #         -  name: pensjon-psak-proxy-q2
 #            namespace: pensjon-q2
 #            ingress: https://pensjon-psak-proxy-q2.dev.intern.nav.no
