@@ -47,7 +47,7 @@ jobs:
             remote: http://pensjon-psak-q0.pensjon-q0.svc.nais.local
             cluster: dev-fss
             azure_ad_group: "a17bb6c9-26d3-451b-b22b-4134b72669ec" # nais-team-pensjon-q0-innlogging
-            enable_webproxy: true
+            vars_file: fss
             outbound_application: pensjon-psak-q0.pensjon-q0.svc.nais.local
 
          -  name: pensjon-psak-proxy-q1
@@ -56,7 +56,7 @@ jobs:
             remote: http://pensjon-psak-q1.pensjon-q1.svc.nais.local
             cluster: dev-fss
             azure_ad_group: "b90bfc98-bfc1-44d8-81fb-f7dfbb77d062" # nais-team-pensjon-q1-innlogging
-            enable_webproxy: true
+            vars_file: fss
             outbound_application: pensjon-psak-q1.pensjon-q1.svc.nais.local
 
          -  name: pensjon-psak-proxy-q1
@@ -65,7 +65,7 @@ jobs:
             remote: http://pensjon-psak-q1.pensjon-q1
             cluster: dev-gcp
             azure_ad_group: "b90bfc98-bfc1-44d8-81fb-f7dfbb77d062" # nais-team-pensjon-q1-innlogging
-            enable_webproxy: false
+            vars_file: gcp
             outbound_application: pensjon-psak-q1.pensjon-q1
 
 #         -  name: pensjon-psak-proxy-q2
@@ -81,7 +81,7 @@ jobs:
             remote: http://pensjon-psak-q5.pensjon-q5.svc.nais.local
             cluster: dev-fss
             azure_ad_group: "8179b33b-87db-41b9-9505-e063c2b4737b" # nais-team-pensjon-q5-innlogging
-            enable_webproxy: true
+            vars_file: fss
             outbound_application: pensjon-psak-q5.pensjon-q5.svc.nais.local
 
     steps:
@@ -93,4 +93,5 @@ jobs:
           IMAGE: "${{ needs.build.outputs.image }}"
           RESOURCE: .nais/nais.yaml
           TELEMETRY: ${{ needs.build.outputs.telemetry }}
-          VAR: remote=${{ matrix.remote }},ingress=${{ matrix.ingress }},azure_ad_group=${{ matrix.azure_ad_group }},name=${{ matrix.name }},namespace=${{ matrix.namespace }},enable_webproxy=${{ matrix.enable_webproxy }},outbound_application=${{ matrix.outbound_application }}
+          VAR: remote=${{ matrix.remote }},ingress=${{ matrix.ingress }},azure_ad_group=${{ matrix.azure_ad_group }},name=${{ matrix.name }},namespace=${{ matrix.namespace }},outbound_application=${{ matrix.outbound_application }}
+          VARS: '.nais/${{ matrix.vars_file }}'
