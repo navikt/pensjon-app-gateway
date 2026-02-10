@@ -53,7 +53,7 @@ spec:
   env:
     - name: "REMOTE"
       value: "{{{ remote }}}"
-   - name: PENSJON-JIT-FOR-Q_URL
+    - name: PENSJON-JIT-FOR-Q_URL
       value: dummy
     - name: PENSJON-JIT-FOR-Q_SCOPE
       value: dummy
