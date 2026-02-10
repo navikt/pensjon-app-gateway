@@ -27,7 +27,7 @@ class GatewayConfig(
                     .filters { filterSpec ->
                         filterSpec.filter(PreserveHostHeaderGatewayFilterFactory().apply())
                         filterSpec.filter(begrunnelseFilter)
-                        filterSpec.filter(jitFilter)
+//                        filterSpec.filter(jitFilter)  //FIXME: Anders
                     }
                     .uri(remote)
             }
