@@ -33,6 +33,10 @@ spec:
       memory: "256Mi"
   ingresses:
     - "{{{ ingress }}}"
+  accessPolicy:
+    outbound:
+      rules:
+        - application: "{{{ outbound_application }}}"
   azure:
     application:
       enabled: true
@@ -51,4 +55,6 @@ spec:
       value: "{{{ remote }}}"
     - name: "JDK_JAVA_OPTIONS"
       value: "$(JAVA_PROXY_OPTIONS)"
+{{#if enable_webproxy}}
   webproxy: true
+{{/if}}
