@@ -62,11 +62,11 @@ jobs:
          -  name: pensjon-psak-proxy-q1
             namespace: pensjon-q1
             ingress: https://pensjon-psak-q1.intern.dev.nav.no
-            remote: http://pensjon-psak-q1.pensjon-q1
+            remote: http://pensjon-psak-q1
             cluster: dev-gcp
             azure_ad_group: "b90bfc98-bfc1-44d8-81fb-f7dfbb77d062" # nais-team-pensjon-q1-innlogging
             vars_file: gcp
-            outbound_application: pensjon-psak-q1.pensjon-q1
+            outbound_application: pensjon-psak-q1
 
 #         -  name: pensjon-psak-proxy-q2
 #            namespace: pensjon-q2
