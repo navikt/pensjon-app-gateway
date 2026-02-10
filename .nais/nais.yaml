@@ -49,6 +49,10 @@ spec:
   env:
     - name: "REMOTE"
       value: "{{{ remote }}}"
+   - name: PENSJON-JIT-FOR-Q_URL
+      value: dummy
+    - name: PENSJON-JIT-FOR-Q_SCOPE
+      value: dummy
     - name: "JDK_JAVA_OPTIONS"
       value: "$(JAVA_PROXY_OPTIONS)"
   webproxy: true
