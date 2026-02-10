@@ -94,4 +94,4 @@ jobs:
           RESOURCE: .nais/nais.yaml
           TELEMETRY: ${{ needs.build.outputs.telemetry }}
           VAR: remote=${{ matrix.remote }},ingress=${{ matrix.ingress }},azure_ad_group=${{ matrix.azure_ad_group }},name=${{ matrix.name }},namespace=${{ matrix.namespace }},outbound_application=${{ matrix.outbound_application }}
-          VARS: '.nais/${{ matrix.vars_file }}'
+          VARS: '.nais/${{ matrix.vars_file }}.yaml'
