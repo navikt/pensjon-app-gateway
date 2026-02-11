@@ -55,6 +55,14 @@ spec:
       replyURLs:
         - "{{{ ingress }}}/login/oauth2/code/azuread"
         - "http://localhost:9080/login/oauth2/code/azuread"
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
   env:
     - name: "REMOTE"
       value: "{{{ remote }}}"
