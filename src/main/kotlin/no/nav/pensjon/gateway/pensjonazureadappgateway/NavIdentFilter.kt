@@ -27,6 +27,6 @@ class NavIdentFilter : GlobalFilter, Ordered {
 
     private fun fetchNAVident(): Mono<String> {
         return ReactiveSecurityContextHolder.getContext()
-            .map { (it.authentication.principal as OidcUser).getClaimAsString("NAVident") }
+            .map { (it.authentication?.principal as? OidcUser)?.getClaimAsString("NAVident") ?: "" }
     }
 }
