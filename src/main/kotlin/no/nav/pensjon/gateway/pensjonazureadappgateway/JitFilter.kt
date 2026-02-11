@@ -12,15 +12,16 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.client.web.server.ServerOAuth2AuthorizedClientRepository
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import java.time.LocalDateTime
 
 @Component
 class JitFilter(
-    @Value("\${PENSJON-JIT-FOR-Q_URL}") private val jitApiUrl: String,
-    @Value("\${PENSJON-JIT-FOR-Q_SCOPE}") private val jitApiScope: String,
-    @Value("\${NAIS_TOKEN_EXCHANGE_ENDPOINT}") private val tokenExchangeEndpoint: String,
+    @param:Value("\${PENSJON-JIT-FOR-Q_URL}") private val jitApiUrl: String,
+    @param:Value("\${PENSJON-JIT-FOR-Q_SCOPE}") private val jitApiScope: String,
+    @param:Value("\${NAIS_TOKEN_EXCHANGE_ENDPOINT}") private val tokenExchangeEndpoint: String,
     private val webClient: WebClient,
     private val authorizedClientRepository: ServerOAuth2AuthorizedClientRepository
 ) : GatewayFilter {
@@ -31,7 +32,7 @@ class JitFilter(
         logger.info("Calling JIT API at {}", jitApiUrl)
 
         return ReactiveSecurityContextHolder.getContext()
-            .map { it.authentication }
+            .mapNotNull { it.authentication }
             .filter { it is OAuth2AuthenticationToken }
             .cast(OAuth2AuthenticationToken::class.java)
             .flatMap { authentication ->
@@ -69,7 +70,7 @@ class JitFilter(
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(requestBody)
             .retrieve()
-            .bodyToMono(TokenResponse::class.java)
+            .bodyToMono<TokenResponse>()
             .map { it.access_token }
             .doOnSuccess { logger.info("Token exchange successful") }
             .doOnError { error -> logger.error("Token exchange failed: {}", error.message) }
@@ -91,7 +92,7 @@ class JitFilter(
             .retrieve()
             .toBodilessEntity()
             .doOnSuccess { response ->
-                logger.info("JIT API call successful, status: {}", response.statusCode)
+                logger.info("JIT API call successful, status: {}", response?.statusCode)
             }
             .doOnError { error ->
                 logger.error("JIT API call failed: {}", error.message)
