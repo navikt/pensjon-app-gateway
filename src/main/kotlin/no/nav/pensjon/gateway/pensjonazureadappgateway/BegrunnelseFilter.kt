@@ -2,18 +2,23 @@ package no.nav.pensjon.gateway.pensjonazureadappgateway
 
 import org.springframework.cloud.gateway.filter.GatewayFilter
 import org.springframework.cloud.gateway.filter.GatewayFilterChain
-import org.springframework.cloud.gateway.support.ServerWebExchangeUtils
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Mono
 import java.net.URI
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory.getLogger
 
 @Component
 class BegrunnelseFilter : GatewayFilter {
 
+    private val logger: Logger = getLogger(javaClass)
+
     override fun filter(exchange: ServerWebExchange, chain: GatewayFilterChain): Mono<Void> {
+        logger.info("BegrunnelseFilter uri: {}", exchange.request.uri)
+
         val request = exchange.request
         val begrunnelse = request.cookies["tilgang_begrunnelse"]
 
