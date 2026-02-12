@@ -29,7 +29,7 @@ class JitFilter(
     private val logger: Logger = getLogger(javaClass)
 
     override fun filter(exchange: ServerWebExchange, chain: GatewayFilterChain): Mono<Void> {
-        logger.info("Calling JIT API at {}", jitApiUrl)
+        logger.info("JitFilter path: {}", exchange.request.uri.path)
 
         return ReactiveSecurityContextHolder.getContext()
             .mapNotNull { it.authentication }

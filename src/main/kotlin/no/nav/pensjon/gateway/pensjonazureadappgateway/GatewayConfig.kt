@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class GatewayConfig(
-    @Value("\${REMOTE}")
+    @param:Value("\${REMOTE}")
     val remote: String,
     val begrunnelseFilter: BegrunnelseFilter,
     val jitFilter: JitFilter
@@ -27,7 +27,7 @@ class GatewayConfig(
                     .filters { filterSpec ->
                         filterSpec.filter(PreserveHostHeaderGatewayFilterFactory().apply())
                         filterSpec.filter(begrunnelseFilter)
-//                        filterSpec.filter(jitFilter)  //FIXME: Anders
+                        filterSpec.filter(jitFilter)
                     }
                     .uri(remote)
             }
