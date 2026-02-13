@@ -44,3 +44,6 @@ button:hover {
     background-color: #555;
 }
 
+input[type="range"] {
+    accent-color: #E0E0E0; /* Light gray */
+}
