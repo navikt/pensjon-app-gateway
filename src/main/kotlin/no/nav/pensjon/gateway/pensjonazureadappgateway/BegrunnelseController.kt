@@ -32,10 +32,11 @@ class BegrunnelseController {
     ): Mono<BegrunnelseResponse> {
         return exchange.session.map { session ->
             session.attributes[JitFilter.BEGRUNNELSE_SESSION_KEY] = request.begrunnelse
+            session.attributes[JitFilter.VARIGHET_SESSION_KEY] = request.varighet
             BegrunnelseResponse(success = true, message = "Begrunnelse lagret")
         }
     }
 
-    data class BegrunnelseRequest(val begrunnelse: String)
+    data class BegrunnelseRequest(val begrunnelse: String, val varighet: Int = 1)
     data class BegrunnelseResponse(val success: Boolean, val message: String)
 }

@@ -33,6 +33,7 @@ class JitFilter(
 
     companion object {
         const val BEGRUNNELSE_SESSION_KEY = "tilgang_begrunnelse"
+        const val VARIGHET_SESSION_KEY = "tilgang_varighet"
     }
 
     override fun filter(exchange: ServerWebExchange, chain: GatewayFilterChain): Mono<Void> {
@@ -56,10 +57,12 @@ class JitFilter(
                         } else {
                             // Begrunnelse finnes, opprett JIT tilgang
                             logger.info("No active JIT but begrunnelse found, creating JIT access")
-                            setJit(oboToken, begrunnelse)
+                            val varighet = session.getAttribute<Int>(VARIGHET_SESSION_KEY) ?: 1
+                            setJit(oboToken, begrunnelse, varighet)
                                 .doOnSuccess {
-                                    // Fjern begrunnelse fra session etter bruk
+                                    // Fjern begrunnelse og varighet fra session etter bruk
                                     session.attributes.remove(BEGRUNNELSE_SESSION_KEY)
+                                    session.attributes.remove(VARIGHET_SESSION_KEY)
                                 }
                                 .then(chain.filter(exchange))
                         }
@@ -127,8 +130,8 @@ class JitFilter(
             .doOnError { error -> logger.error("Token exchange failed: {}", error.message) }
     }
 
-    private fun setJit(accessToken: String, begrunnelse: String): Mono<Void> {
-        logger.info("Creating JIT access with begrunnelse")
+    private fun setJit(accessToken: String, begrunnelse: String, varighet: Int): Mono<Void> {
+        logger.info("Creating JIT access with begrunnelse, duration: {} hours", varighet)
         return webClient.post()
             .uri("$jitApiUrl/api/jit")
             .header("Authorization", "Bearer $accessToken")
@@ -136,7 +139,7 @@ class JitFilter(
                 mapOf(
                     "environment" to "Q2",
                     "startTime" to LocalDateTime.now().toString(),
-                    "durationInHours" to "1",
+                    "durationInHours" to varighet.toString(),
                     "reason" to begrunnelse,
                     "acceptedTerms" to "Jeg aksepterer at mine oppslag på personlige opplysninger blir loggført"
                 )
