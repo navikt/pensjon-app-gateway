@@ -47,7 +47,12 @@ class JitFilter(
                 exchangeToken(accessToken)
             }
             .flatMap { oboToken ->
-                callJitApi(oboToken)
+                if (haveActiveJit(oboToken).block() == true) {
+                    logger.info("Active JIT already exists, skipping JIT API call")
+                    Mono.empty()
+                } else {
+                    setJit(oboToken)
+                }
             }
             .then(chain.filter(exchange))
             .onErrorResume { error ->
@@ -76,7 +81,7 @@ class JitFilter(
             .doOnError { error -> logger.error("Token exchange failed: {}", error.message) }
     }
 
-    private fun callJitApi(accessToken: String): Mono<Void> {
+    private fun setJit(accessToken: String): Mono<Void> {
         return webClient.post()
             .uri("$jitApiUrl/api/jit")
             .header("Authorization", "Bearer $accessToken")
@@ -84,7 +89,7 @@ class JitFilter(
                 mapOf(
                     "environment" to "Q2",
                     "startTime" to LocalDateTime.now().toString(),
-                    "durationInHours" to "2",
+                    "durationInHours" to "1",
                     "reason" to "Tester lagring JIT-opplysninger for pensjon-app-gateway",
                     "acceptedTerms" to "Jeg aksepterer at mine oppslag på personlige opplysninger blir loggført"
                 )
@@ -98,6 +103,20 @@ class JitFilter(
                 logger.error("JIT API call failed: {}", error.message)
             }
             .then()
+    }
+
+    private fun haveActiveJit(accessToken: String): Mono<Boolean> {
+        return webClient.get()
+            .uri("$jitApiUrl/api/jit/active")
+            .header("Authorization", "Bearer $accessToken")
+            .retrieve()
+            .bodyToMono<Boolean>()
+            .doOnSuccess { active ->
+                logger.info("Checked active JIT status: {}", active)
+            }
+            .doOnError { error ->
+                logger.error("Failed to check active JIT status: {}", error.message)
+            }
     }
 
     data class TokenResponse(
