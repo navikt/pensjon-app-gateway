@@ -47,12 +47,16 @@ class JitFilter(
                 exchangeToken(accessToken)
             }
             .flatMap { oboToken ->
-                if (haveActiveJit(oboToken).block() == true) {
-                    logger.info("Active JIT already exists, skipping JIT API call")
-                    Mono.empty()
-                } else {
-                    setJit(oboToken)
-                }
+                hasActiveJit(oboToken)
+                    .flatMap { isActive ->
+                        if (isActive) {
+                            logger.info("Active JIT already exists, skipping setJit API call")
+                            Mono.empty()
+                        } else {
+                            logger.info("No active JIT, calling setJit API")
+                            setJit(oboToken)
+                        }
+                    }
             }
             .then(chain.filter(exchange))
             .onErrorResume { error ->
@@ -105,7 +109,7 @@ class JitFilter(
             .then()
     }
 
-    private fun haveActiveJit(accessToken: String): Mono<Boolean> {
+    private fun hasActiveJit(accessToken: String): Mono<Boolean> {
         return webClient.get()
             .uri("$jitApiUrl/api/jit/active")
             .header("Authorization", "Bearer $accessToken")
