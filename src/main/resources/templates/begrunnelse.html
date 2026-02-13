@@ -21,7 +21,7 @@
 
     <label>
         <input type="checkbox" name="conditions" id="conditions" required>
-        Jeg aksepterer at mine oppslag på personlige opplysninger blir loggført.
+        <span th:text="${acceptedTerms}">Jeg aksepterer at mine oppslag på personlige opplysninger blir loggført.</span>
     </label>
     <br>
     <button type="submit">Send</button>

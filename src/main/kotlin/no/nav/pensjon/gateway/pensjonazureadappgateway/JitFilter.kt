@@ -35,6 +35,7 @@ class JitFilter(
     companion object {
         const val BEGRUNNELSE_SESSION_KEY = "tilgang_begrunnelse"
         const val VARIGHET_SESSION_KEY = "tilgang_varighet"
+        const val ACCEPTED_TERMS = "Jeg aksepterer at mine oppslag på personlige opplysninger blir loggført."
     }
 
     override fun filter(exchange: ServerWebExchange, chain: GatewayFilterChain): Mono<Void> {
@@ -142,7 +143,7 @@ class JitFilter(
                     "startTime" to LocalDateTime.now().toString(),
                     "durationInHours" to varighet.toString(),
                     "reason" to begrunnelse,
-                    "acceptedTerms" to "Jeg aksepterer at mine oppslag på personlige opplysninger blir loggført"
+                    "acceptedTerms" to ACCEPTED_TERMS
                 )
             )
             .retrieve()

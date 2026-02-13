@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.core.io.ClassPathResource
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
+import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -20,7 +21,8 @@ class BegrunnelseController {
             .resources("/pensjon-app-gateway/public/" + "**", ClassPathResource("public/"))
 
     @GetMapping("/pensjon-app-gateway/begrunnelse")
-    fun otp(): Mono<String> {
+    fun begrunnelse(model: Model): Mono<String> {
+        model.addAttribute("acceptedTerms", JitFilter.ACCEPTED_TERMS)
         return Mono.just("begrunnelse")
     }
 
