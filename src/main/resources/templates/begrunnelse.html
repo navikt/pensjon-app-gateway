@@ -24,21 +24,33 @@
 </form>
 <script>
     document.getElementById("begrunnelseForm").addEventListener("submit", function (event) {
-        try {
-            event.preventDefault();
+        event.preventDefault();
 
-            const encoded = encodeURIComponent(document.getElementById("begrunnelse").value);
-            document.cookie = `tilgang_begrunnelse=${encoded}; path=/`;
+        const begrunnelse = document.getElementById("begrunnelse").value;
 
-            const redirectUri = new URLSearchParams(window.location.search).get("redirect_uri");
-            const relativeToCurrentOrigin = new URL(redirectUri, window.location.origin);
-
-            // redirect to the originally requested page
-            window.location.href = relativeToCurrentOrigin.toString();
-        } catch (error) {
-            console.error(error);
-            alert("Det skjedde en feil - klarte ikke å sette begrunnelse.");
-        }
+        // Send begrunnelse to server to store in session
+        fetch('/pensjon-app-gateway/begrunnelse', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ begrunnelse: begrunnelse })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirect to the originally requested page
+                const redirectUri = new URLSearchParams(window.location.search).get("redirect_uri");
+                const relativeToCurrentOrigin = new URL(redirectUri, window.location.origin);
+                window.location.href = relativeToCurrentOrigin.toString();
+            } else {
+                alert("Det skjedde en feil - klarte ikke å lagre begrunnelse.");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Det skjedde en feil - klarte ikke å lagre begrunnelse.");
+        });
     });
 </script>
 </body>

@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration
 class GatewayConfig(
     @param:Value("\${REMOTE}")
     val remote: String,
-    val begrunnelseFilter: BegrunnelseFilter,
     val jitFilter: JitFilter
 ) {
 
@@ -26,7 +25,6 @@ class GatewayConfig(
                 route.path("/**")
                     .filters { filterSpec ->
                         filterSpec.filter(PreserveHostHeaderGatewayFilterFactory().apply())
-                        filterSpec.filter(begrunnelseFilter)
                         filterSpec.filter(jitFilter)
                     }
                     .uri(remote)

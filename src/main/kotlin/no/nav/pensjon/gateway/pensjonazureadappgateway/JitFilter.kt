@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cloud.gateway.filter.GatewayFilter
 import org.springframework.cloud.gateway.filter.GatewayFilterChain
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
@@ -14,7 +15,9 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.server.ServerWebExchange
+import org.springframework.web.util.UriComponentsBuilder
 import reactor.core.publisher.Mono
+import java.net.URI
 import java.time.LocalDateTime
 
 @Component
@@ -28,9 +31,67 @@ class JitFilter(
 
     private val logger: Logger = getLogger(javaClass)
 
-    override fun filter(exchange: ServerWebExchange, chain: GatewayFilterChain): Mono<Void> {
-        logger.info("Calling JIT API at {}", jitApiUrl)
+    companion object {
+        const val BEGRUNNELSE_SESSION_KEY = "tilgang_begrunnelse"
+    }
 
+    override fun filter(exchange: ServerWebExchange, chain: GatewayFilterChain): Mono<Void> {
+        logger.info("JitFilter: Checking JIT access for {}", exchange.request.uri)
+
+        return exchange.session.flatMap { session ->
+            getOboToken(exchange).flatMap { oboToken ->
+                hasActiveJit(oboToken).flatMap { isActive ->
+                    if (isActive) {
+                        // Bruker har aktiv JIT, slipp gjennom
+                        logger.info("User has active JIT access, proceeding")
+                        chain.filter(exchange)
+                    } else {
+                        // Bruker har ikke aktiv JIT, sjekk om begrunnelse er oppgitt
+                        val begrunnelse = session.getAttribute<String>(BEGRUNNELSE_SESSION_KEY)
+
+                        if (begrunnelse.isNullOrEmpty()) {
+                            // Ingen begrunnelse, redirect til skjema
+                            logger.info("No active JIT and no begrunnelse, redirecting to form")
+                            redirectToBegrunnelseForm(exchange)
+                        } else {
+                            // Begrunnelse finnes, opprett JIT tilgang
+                            logger.info("No active JIT but begrunnelse found, creating JIT access")
+                            setJit(oboToken, begrunnelse)
+                                .doOnSuccess {
+                                    // Fjern begrunnelse fra session etter bruk
+                                    session.attributes.remove(BEGRUNNELSE_SESSION_KEY)
+                                }
+                                .then(chain.filter(exchange))
+                        }
+                    }
+                }
+            }
+        }.onErrorResume { error ->
+            logger.error("Error during JIT check, proceeding with request anyway: {}", error.message)
+            chain.filter(exchange)
+        }
+    }
+
+    private fun redirectToBegrunnelseForm(exchange: ServerWebExchange): Mono<Void> {
+        exchange.response.statusCode = HttpStatus.FOUND
+        val location = UriComponentsBuilder
+            .fromPath("/pensjon-app-gateway/begrunnelse")
+            .queryParam("redirect_uri", makeRelativeURI(exchange.request.uri))
+            .build().toUri()
+        exchange.response.headers.location = location
+        return exchange.response.setComplete()
+    }
+
+    private fun makeRelativeURI(absoluteURI: URI): URI {
+        return UriComponentsBuilder.fromUri(absoluteURI)
+            .scheme(null)
+            .host(null)
+            .port(null)
+            .build()
+            .toUri()
+    }
+
+    private fun getOboToken(exchange: ServerWebExchange): Mono<String> {
         return ReactiveSecurityContextHolder.getContext()
             .mapNotNull { it.authentication }
             .filter { it is OAuth2AuthenticationToken }
@@ -43,26 +104,7 @@ class JitFilter(
                 )
             }
             .map { authorizedClient -> authorizedClient.accessToken.tokenValue }
-            .flatMap { accessToken ->
-                exchangeToken(accessToken)
-            }
-            .flatMap { oboToken ->
-                hasActiveJit(oboToken)
-                    .flatMap { isActive ->
-                        if (isActive) {
-                            logger.info("Active JIT already exists, skipping setJit API call")
-                            Mono.empty()
-                        } else {
-                            logger.info("No active JIT, calling setJit API")
-                            setJit(oboToken)
-                        }
-                    }
-            }
-            .then(chain.filter(exchange))
-            .onErrorResume { error ->
-                logger.error("Error during JIT API call, proceeding with request anyway: {}", error.message)
-                chain.filter(exchange)
-            }
+            .flatMap { accessToken -> exchangeToken(accessToken) }
     }
 
     private fun exchangeToken(userToken: String): Mono<String> {
@@ -85,7 +127,8 @@ class JitFilter(
             .doOnError { error -> logger.error("Token exchange failed: {}", error.message) }
     }
 
-    private fun setJit(accessToken: String): Mono<Void> {
+    private fun setJit(accessToken: String, begrunnelse: String): Mono<Void> {
+        logger.info("Creating JIT access with begrunnelse")
         return webClient.post()
             .uri("$jitApiUrl/api/jit")
             .header("Authorization", "Bearer $accessToken")
@@ -94,7 +137,7 @@ class JitFilter(
                     "environment" to "Q2",
                     "startTime" to LocalDateTime.now().toString(),
                     "durationInHours" to "1",
-                    "reason" to "Tester lagring JIT-opplysninger for pensjon-app-gateway",
+                    "reason" to begrunnelse,
                     "acceptedTerms" to "Jeg aksepterer at mine oppslag på personlige opplysninger blir loggført"
                 )
             )
@@ -115,6 +158,7 @@ class JitFilter(
             .header("Authorization", "Bearer $accessToken")
             .retrieve()
             .bodyToMono<Boolean>()
+            .defaultIfEmpty(false)
             .doOnSuccess { active ->
                 logger.info("Checked active JIT status: {}", active)
             }
