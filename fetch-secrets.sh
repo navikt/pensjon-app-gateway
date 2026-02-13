@@ -89,6 +89,7 @@ echo "REMOTE='${remote}'" >> "${envfile}"
 echo "PENSJON-JIT-FOR-Q_URL='https://pensjon-jit-for-q.intern.dev.nav.no'" >> "${envfile}"
 echo "PENSJON-JIT-FOR-Q_SCOPE='api://dev-gcp.pensjon-saksbehandling.pensjon-jit-for-q/.default'" >> "${envfile}"
 echo "NAIS_TOKEN_EXCHANGE_ENDPOINT='http://127.0.0.1:7164/api/v1/token/exchange'" >> "${envfile}"
+echo "ENVIRONMENT_NAME='Q2'" >> "${envfile}"
 
 echo
 
