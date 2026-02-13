@@ -25,6 +25,7 @@ class JitFilter(
     @param:Value("\${PENSJON-JIT-FOR-Q_URL}") private val jitApiUrl: String,
     @param:Value("\${PENSJON-JIT-FOR-Q_SCOPE}") private val jitApiScope: String,
     @param:Value("\${NAIS_TOKEN_EXCHANGE_ENDPOINT}") private val tokenExchangeEndpoint: String,
+    @param:Value("\${ENVIRONMENT_NAME}") private val environmentName: String,
     private val webClient: WebClient,
     private val authorizedClientRepository: ServerOAuth2AuthorizedClientRepository
 ) : GatewayFilter {
@@ -137,7 +138,7 @@ class JitFilter(
             .header("Authorization", "Bearer $accessToken")
             .bodyValue(
                 mapOf(
-                    "environment" to "Q2",
+                    "environment" to environmentName,
                     "startTime" to LocalDateTime.now().toString(),
                     "durationInHours" to varighet.toString(),
                     "reason" to begrunnelse,
