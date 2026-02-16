@@ -159,7 +159,7 @@ class JitFilter(
 
     private fun hasActiveJit(accessToken: String): Mono<Boolean> {
         return webClient.get()
-            .uri("$jitApiUrl/api/jit/active")
+            .uri("$jitApiUrl/api/jit/active?environment=$environmentName")
             .header("Authorization", "Bearer $accessToken")
             .retrieve()
             .bodyToMono<Boolean>()
