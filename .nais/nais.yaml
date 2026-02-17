@@ -36,7 +36,7 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: https://pensjon-jit-for-q.intern.nav.no
+        - host: pensjon-jit-for-q.intern.nav.no
       rules:
         - application: "{{{ outbound_application }}}"
   azure:
