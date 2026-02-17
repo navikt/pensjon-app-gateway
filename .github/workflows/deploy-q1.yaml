@@ -42,15 +42,15 @@ jobs:
       matrix:
         include:
 
-#         -  name: pensjon-psak-proxy-q1
-#            namespace: pensjon-q1
-#            ingress: https://pensjon-psak-q1.nais.preprod.local
-#            remote: http://pensjon-psak-q1.pensjon-q1.svc.nais.local
-#            cluster: dev-fss
-#            azure_ad_group: "b90bfc98-bfc1-44d8-81fb-f7dfbb77d062" # nais-team-pensjon-q1-innlogging
-#            vars_file: fss
-#            outbound_application: pensjon-psak-q1.pensjon-q1.svc.nais.local
-#            environment: Q1
+         -  name: pensjon-psak-proxy-q1
+            namespace: pensjon-q1
+            ingress: https://pensjon-psak-q1.nais.preprod.local
+            remote: http://pensjon-psak-q1.pensjon-q1.svc.nais.local
+            cluster: dev-fss
+            azure_ad_group: "b90bfc98-bfc1-44d8-81fb-f7dfbb77d062" # nais-team-pensjon-q1-innlogging
+            vars_file: fss
+            outbound_application: pensjon-psak-q1.pensjon-q1.svc.nais.local
+            environment: Q1
 
          -  name: pensjon-psak-proxy-q1
             namespace: pensjon-q1
