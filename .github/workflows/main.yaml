@@ -71,13 +71,6 @@ jobs:
             outbound_application: pensjon-psak-q1
             environment: Q1
 
-#         -  name: pensjon-psak-proxy-q2
-#            namespace: pensjon-q2
-#            ingress: https://pensjon-psak-proxy-q2.dev.intern.nav.no
-#            remote: http://pensjon-psak-q2.pensjon-q2.svc.nais.local
-#            cluster: dev-fss
-#            azure_ad_group: "6ecb30ca-93c0-41bb-8e7c-4ce5897d7025" # Teampensjon
-
          -  name: pensjon-psak-proxy-q5
             namespace: pensjon-q5
             ingress: https://pensjon-psak-q5.nais.preprod.local
