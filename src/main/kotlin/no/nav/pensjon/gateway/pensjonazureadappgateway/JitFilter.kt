@@ -151,8 +151,9 @@ class JitFilter(
             .doOnSuccess { response ->
                 logger.info("JIT API call successful, status: {}", response?.statusCode)
             }
-            .doOnError { error ->
-                logger.error("JIT API call failed: {}", error.message)
+            .onErrorResume { error ->
+                logger.warn("JIT API call failed, proceeding anyway: {}", error.message)
+                Mono.empty()
             }
             .then()
     }
@@ -167,8 +168,9 @@ class JitFilter(
             .doOnSuccess { active ->
                 logger.info("Checked active JIT status: {}", active)
             }
-            .doOnError { error ->
-                logger.error("Failed to check active JIT status: {}", error.message)
+            .onErrorResume { error ->
+                logger.warn("Failed to check active JIT status, assuming no active JIT: {}", error.message)
+                Mono.just(false)
             }
     }
 
