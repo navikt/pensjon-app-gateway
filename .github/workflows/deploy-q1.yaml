@@ -41,15 +41,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-#         -  name: pensjon-psak-proxy-q0
-#            namespace: pensjon-q0
-#            ingress: https://pensjon-psak-q0.nais.preprod.local
-#            remote: http://pensjon-psak-q0.pensjon-q0.svc.nais.local
-#            cluster: dev-fss
-#            azure_ad_group: "a17bb6c9-26d3-451b-b22b-4134b72669ec" # nais-team-pensjon-q0-innlogging
-#            vars_file: fss
-#            outbound_application: pensjon-psak-q0.pensjon-q0.svc.nais.local
-#            environment: Q0
 
 #         -  name: pensjon-psak-proxy-q1
 #            namespace: pensjon-q1
@@ -70,16 +61,6 @@ jobs:
             vars_file: gcp
             outbound_application: pensjon-psak-q1
             environment: Q1
-
-#         -  name: pensjon-psak-proxy-q5
-#            namespace: pensjon-q5
-#            ingress: https://pensjon-psak-q5.nais.preprod.local
-#            remote: http://pensjon-psak-q5.pensjon-q5.svc.nais.local
-#            cluster: dev-fss
-#            azure_ad_group: "8179b33b-87db-41b9-9505-e063c2b4737b" # nais-team-pensjon-q5-innlogging
-#            vars_file: fss
-#            outbound_application: pensjon-psak-q5.pensjon-q5.svc.nais.local
-#            environment: Q5
 
     steps:
       - uses: actions/checkout@v4
