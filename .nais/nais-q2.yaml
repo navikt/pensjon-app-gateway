@@ -70,3 +70,5 @@ spec:
       value: http://pensjon-jit-for-q.pensjon-saksbehandling
     - name: PENSJON-JIT-FOR-Q_SCOPE
       value: api://dev-gcp.pensjon-saksbehandling.pensjon-jit-for-q/.default
+    - name: "ENVIRONMENT_NAME"
+      value: "Q2"

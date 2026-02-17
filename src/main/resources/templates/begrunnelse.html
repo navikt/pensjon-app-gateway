@@ -10,35 +10,57 @@
 <form id="begrunnelseForm">
     <h2>Fyll ut begrunnelse for tilgang</h2>
     <p>
-        Du ber om tilgang til et begrenset miljø. Du trenger å oppgi begrunnelse for tilgangen.
+        Du ber om tilgang til et begrenset miljø. Du trenger å oppgi begrunnelse for tilgangen (minimum 5 tegn).
     </p>
     <label for="begrunnelse">Begrunnelse:</label><br>
     <textarea autofocus id="begrunnelse" name="begrunnelse" rows="4" cols="50" required></textarea><br><br>
 
+    <label for="varighet">Varighet: <span id="varighetValue">1</span> time(r)</label><br>
+    <input type="range" id="varighet" name="varighet" min="1" max="8" value="1" step="1" style="width: 100%; max-width: 400px;">
+    <br><br>
+
     <label>
         <input type="checkbox" name="conditions" id="conditions" required>
-        Jeg aksepterer at mine oppslag på personlige opplysninger blir loggført.
+        <span th:text="${acceptedTerms}">Jeg aksepterer at mine oppslag på personlige opplysninger blir loggført.</span>
     </label>
     <br>
     <button type="submit">Send</button>
 </form>
 <script>
+    // Update slider value display
+    document.getElementById("varighet").addEventListener("input", function() {
+        document.getElementById("varighetValue").textContent = this.value;
+    });
+
     document.getElementById("begrunnelseForm").addEventListener("submit", function (event) {
-        try {
-            event.preventDefault();
+        event.preventDefault();
 
-            const encoded = encodeURIComponent(document.getElementById("begrunnelse").value);
-            document.cookie = `tilgang_begrunnelse=${encoded}; path=/`;
+        const begrunnelse = document.getElementById("begrunnelse").value;
+        const varighet = document.getElementById("varighet").value;
 
-            const redirectUri = new URLSearchParams(window.location.search).get("redirect_uri");
-            const relativeToCurrentOrigin = new URL(redirectUri, window.location.origin);
-
-            // redirect to the originally requested page
-            window.location.href = relativeToCurrentOrigin.toString();
-        } catch (error) {
-            console.error(error);
-            alert("Det skjedde en feil - klarte ikke å sette begrunnelse.");
-        }
+        // Send begrunnelse and varighet to server to store in session
+        fetch('/pensjon-app-gateway/begrunnelse', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ begrunnelse: begrunnelse, varighet: parseInt(varighet) })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirect to the originally requested page
+                const redirectUri = new URLSearchParams(window.location.search).get("redirect_uri");
+                const relativeToCurrentOrigin = new URL(redirectUri, window.location.origin);
+                window.location.href = relativeToCurrentOrigin.toString();
+            } else {
+                alert("Det skjedde en feil - klarte ikke å lagre begrunnelse.");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Det skjedde en feil - klarte ikke å lagre begrunnelse.");
+        });
     });
 </script>
 </body>
