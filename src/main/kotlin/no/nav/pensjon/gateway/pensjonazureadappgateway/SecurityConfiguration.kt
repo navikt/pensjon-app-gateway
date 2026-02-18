@@ -91,6 +91,12 @@ class SecurityConfiguration {
     fun webClient(): WebClient = webClientProxy()
 
     @Bean
+    fun webClientNoProxy(): WebClient = WebClient.builder().filter { request, next ->
+        logger.info("Non-proxied request to {}", request.url())
+        next.exchange(request)
+    }.build()
+
+    @Bean
     fun reactiveJwtDecoder(
         @Value("\${AZURE_APP_CLIENT_ID}") clientId: String,
         @Value("\${AZURE_OPENID_CONFIG_ISSUER}") issuer: String,
