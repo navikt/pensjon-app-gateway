@@ -25,7 +25,7 @@ class GatewayConfig(
                 route.path("/**")
                     .filters { filterSpec ->
                         filterSpec.filter(PreserveHostHeaderGatewayFilterFactory().apply())
-                        filterSpec.filter(jitFilter)
+                      //  filterSpec.filter(jitFilter) FIXME: temporary disabled because of token exchange problems in fss
                     }
                     .uri(remote)
             }
