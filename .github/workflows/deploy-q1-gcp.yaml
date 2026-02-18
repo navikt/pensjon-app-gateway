@@ -1,4 +1,4 @@
-name: "Build and deploy to nais q1"
+name: "Build and deploy to nais q1 gcp"
 on:
   workflow_dispatch:
 #  push:
