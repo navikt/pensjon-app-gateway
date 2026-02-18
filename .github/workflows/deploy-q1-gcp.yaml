@@ -1,0 +1,65 @@
+name: "Build and deploy to nais q1"
+on:
+  workflow_dispatch:
+#  push:
+#    branches:
+#      - "main"
+jobs:
+  build:
+    name: "build"
+    permissions:
+      contents: "read"
+      id-token: "write"
+      packages: "write"
+    runs-on: "ubuntu-latest"
+    outputs:
+      image: "${{ steps.docker-push.outputs.image }}"
+      telemetry: "${{ steps.docker-push.outputs.telemetry }}"
+    steps:
+      - uses: "actions/checkout@v3"
+      - uses: "actions/setup-java@v3"
+        with:
+          java-version: "21"
+          distribution: 'temurin'
+          cache: "maven"
+      - name: "compile and run tests"
+        run: "mvn package"
+      - uses: nais/docker-build-push@v0
+        id: docker-push
+        with:
+          team: pensjon-q1
+
+  deploy:
+    name: "Deploy"
+    permissions:
+      contents: "read"
+      id-token: "write" 
+    needs: "build"
+    runs-on: "ubuntu-latest"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+
+         -  name: pensjon-psak-proxy-q1
+            namespace: pensjon-q1
+            ingress: https://pensjon-psak-q1.intern.dev.nav.no
+            remote: http://pensjon-psak-q1
+            cluster: dev-gcp
+            azure_ad_group: "b90bfc98-bfc1-44d8-81fb-f7dfbb77d062" # nais-team-pensjon-q1-innlogging
+            vars_file: gcp
+            outbound_application: pensjon-psak-q1
+            environment: Q1
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        name: "Deploy to NAIS"
+        env:
+          CLUSTER: "${{ matrix.cluster }}"
+          IMAGE: "${{ needs.build.outputs.image }}"
+          RESOURCE: .nais/nais.yaml
+          TELEMETRY: ${{ needs.build.outputs.telemetry }}
+          VAR: remote=${{ matrix.remote }},ingress=${{ matrix.ingress }},azure_ad_group=${{ matrix.azure_ad_group }},name=${{ matrix.name }},namespace=${{ matrix.namespace }},outbound_application=${{ matrix.outbound_application }},environment=${{ matrix.environment }}
+          VARS: '.nais/${{ matrix.vars_file }}.yaml'
