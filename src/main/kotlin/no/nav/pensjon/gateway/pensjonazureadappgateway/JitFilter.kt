@@ -2,6 +2,7 @@ package no.nav.pensjon.gateway.pensjonazureadappgateway
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory.getLogger
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cloud.gateway.filter.GatewayFilter
 import org.springframework.cloud.gateway.filter.GatewayFilterChain
@@ -26,7 +27,8 @@ class JitFilter(
     @param:Value("\${PENSJON-JIT-FOR-Q_SCOPE}") private val jitApiScope: String,
     @param:Value("\${NAIS_TOKEN_EXCHANGE_ENDPOINT}") private val tokenExchangeEndpoint: String,
     @param:Value("\${ENVIRONMENT_NAME}") private val environmentName: String,
-    private val webClient: WebClient,
+    @param:Qualifier("webClient") private val webClient: WebClient,
+    @param:Qualifier("webClientNoProxy") private val webClientNoProxy: WebClient,
     private val authorizedClientRepository: ServerOAuth2AuthorizedClientRepository
 ) : GatewayFilter {
 
@@ -121,7 +123,7 @@ class JitFilter(
             "user_token" to userToken
         )
 
-        return webClient.post()
+        return webClientNoProxy.post()
             .uri(tokenExchangeEndpoint)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(requestBody)
