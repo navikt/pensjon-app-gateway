@@ -27,8 +27,6 @@ import org.springframework.security.oauth2.jwt.*
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.web.reactive.function.client.*
 import reactor.netty.http.client.HttpClient
-import reactor.netty.transport.ProxyProvider.Proxy.HTTP
-import java.net.URI
 
 @Configuration
 @EnableWebFluxSecurity
@@ -90,11 +88,6 @@ class SecurityConfiguration {
     @Bean
     fun webClient(): WebClient = webClientProxy()
 
-    @Bean
-    fun webClientNoProxy(): WebClient = WebClient.builder().filter { request, next ->
-        logger.info("Non-proxied request to {}", request.url())
-        next.exchange(request)
-    }.build()
 
     @Bean
     fun reactiveJwtDecoder(
@@ -115,26 +108,12 @@ class SecurityConfiguration {
     }
 
     fun webClientProxy(): WebClient =
-        System.getenv("HTTP_PROXY")
-            ?.let { URI(it) }
-            ?.run {
-                logger.info("Using http proxy {}", this)
-                WebClient.builder().clientConnector(
-                    ReactorClientHttpConnector(
-                        HttpClient.create().proxy {
-                            it
-                                .type(HTTP)
-                                .host(host)
-                                .port(port)
-                        }
-                    )
-                ).filter { request, next ->
-                    logger.info("Proxied request to {}", request.url())
-                    next.exchange(request)
-                }.build()
-            }
-            ?: WebClient.builder().filter { request, next ->
-                logger.info("Non-proxied request to {}", request.url())
-                next.exchange(request)
-            }.build()
+        WebClient.builder().clientConnector(
+            ReactorClientHttpConnector(
+                HttpClient.create().proxyWithSystemProperties()
+            )
+        ).filter { request, next ->
+            logger.info("Request to {}", request.url())
+            next.exchange(request)
+        }.build()
 }
