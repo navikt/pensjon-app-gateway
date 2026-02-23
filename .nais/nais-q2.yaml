@@ -39,7 +39,7 @@ spec:
         - application: pensjon-psak-q2
           namespace: pensjon-q2
           cluster: dev-gcp
-        - application: pensjon-jit-for-q
+        - application: pensjon-jit-for-q-q2
           namespace: pensjon-saksbehandling
           cluster: dev-gcp
   azure:
@@ -67,8 +67,8 @@ spec:
     - name: "REMOTE"
       value: "{{{ remote }}}"
     - name: PENSJON-JIT-FOR-Q_URL
-      value: http://pensjon-jit-for-q.pensjon-saksbehandling
+      value: http://pensjon-jit-for-q-q2.pensjon-saksbehandling
     - name: PENSJON-JIT-FOR-Q_SCOPE
-      value: api://dev-gcp.pensjon-saksbehandling.pensjon-jit-for-q/.default
+      value: api://dev-gcp.pensjon-saksbehandling.pensjon-jit-for-q-q2/.default
     - name: "ENVIRONMENT_NAME"
       value: "Q2"
