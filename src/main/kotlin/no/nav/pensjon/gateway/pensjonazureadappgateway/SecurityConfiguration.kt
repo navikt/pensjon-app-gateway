@@ -10,6 +10,8 @@ import org.springframework.security.authentication.DelegatingReactiveAuthenticat
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository
+import org.springframework.security.oauth2.client.web.server.DefaultServerOAuth2AuthorizationRequestResolver
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginReactiveAuthenticationManager
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest
 import org.springframework.security.oauth2.client.endpoint.ReactiveOAuth2AccessTokenResponseClient
@@ -37,6 +39,7 @@ class SecurityConfiguration {
     fun springSecurityFilterChain(
         http: ServerHttpSecurity,
         reactiveAuthenticationManager: ReactiveAuthenticationManager,
+        clientRegistrationRepository: ReactiveClientRegistrationRepository,
     ): SecurityWebFilterChain {
         http.csrf { it.disable() }
         http.authorizeExchange { authorize: ServerHttpSecurity.AuthorizeExchangeSpec ->
@@ -46,7 +49,16 @@ class SecurityConfiguration {
                 .pathMatchers("/actuator/prometheus/**").permitAll()
                 .anyExchange().authenticated()
         }
-        http.oauth2Login { it.authenticationManager(reactiveAuthenticationManager) }
+
+        val authorizationRequestResolver = DefaultServerOAuth2AuthorizationRequestResolver(clientRegistrationRepository)
+        authorizationRequestResolver.setAuthorizationRequestCustomizer { builder ->
+            builder.additionalParameters { params -> params["domain_hint"] = "nav.no" }
+        }
+
+        http.oauth2Login {
+            it.authenticationManager(reactiveAuthenticationManager)
+            it.authorizationRequestResolver(authorizationRequestResolver)
+        }
         http.oauth2Client { it.authenticationManager(reactiveAuthenticationManager) }
         return http.build()
     }
