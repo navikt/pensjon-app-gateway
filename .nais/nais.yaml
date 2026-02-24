@@ -36,7 +36,7 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: pensjon-jit-for-q.intern.nav.no
+        - host: pensjon-jit-for-q-prodlik.intern.dev.nav.no
       rules:
         - application: "{{{ outbound_application }}}"
   azure:
@@ -64,9 +64,9 @@ spec:
     - name: "REMOTE"
       value: "{{{ remote }}}"
     - name: PENSJON-JIT-FOR-Q_URL
-      value: https://pensjon-jit-for-q.intern.nav.no
+      value: https://pensjon-jit-for-q-prodlik.intern.dev.nav.no
     - name: PENSJON-JIT-FOR-Q_SCOPE
-      value: api://prod-gcp.pensjon-saksbehandling.pensjon-jit-for-q/.default
+      value: api://dev-gcp.pensjon-saksbehandling.pensjon-jit-for-q-prodlik/.default
     - name: "ENVIRONMENT_NAME"
       value: "{{{ environment }}}"
 {{#if enable_webproxy}}
