@@ -1,0 +1,32 @@
+name: Build pensjon-app-gateway
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - .github/**
+      - README.md
+      - fetch-secrets.sh
+jobs:
+  build:
+    name: "build"
+    permissions:
+      contents: "read"
+      id-token: "write"
+      packages: "write"
+    runs-on: "ubuntu-latest"
+    outputs:
+      image: "${{ steps.docker-push.outputs.image }}"
+      telemetry: "${{ steps.docker-push.outputs.telemetry }}"
+    steps:
+      - uses: "actions/checkout@v3"
+      - uses: "actions/setup-java@v3"
+        with:
+          java-version: "21"
+          distribution: 'temurin'
+          cache: "maven"
+      - name: "compile and run tests"
+        run: "mvn package"
+      - uses: nais/docker-build-push@v0
+        id: docker-push
+        with:
+          team: pensjon-q1
