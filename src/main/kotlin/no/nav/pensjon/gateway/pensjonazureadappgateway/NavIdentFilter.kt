@@ -16,12 +16,17 @@ class NavIdentFilter : GlobalFilter, Ordered {
     override fun filter(exchange: ServerWebExchange, chain: GatewayFilterChain): Mono<Void> {
         return fetchNAVident()
             .flatMap { navIdent ->
-                val mutatedRequest = exchange.request.mutate()
-                    .header("x-forwarded-navident", navIdent)
-                    .build()
-                val mutatedExchange = exchange.mutate().request(mutatedRequest).build()
-                chain.filter(mutatedExchange)
+                if (navIdent.isNotBlank()) {
+                    val mutatedRequest = exchange.request.mutate()
+                        .header("x-forwarded-navident", navIdent)
+                        .build()
+                    val mutatedExchange = exchange.mutate().request(mutatedRequest).build()
+                    chain.filter(mutatedExchange)
+                } else {
+                    chain.filter(exchange)
+                }
             }
+            .switchIfEmpty(chain.filter(exchange))
     }
 
     override fun getOrder(): Int {
