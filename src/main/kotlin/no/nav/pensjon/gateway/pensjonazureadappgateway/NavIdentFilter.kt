@@ -15,10 +15,13 @@ class NavIdentFilter : GlobalFilter, Ordered {
 
     override fun filter(exchange: ServerWebExchange, chain: GatewayFilterChain): Mono<Void> {
         return fetchNAVident()
-            .doOnSuccess {navIdent ->
-                exchange.request.mutate().headers { it.add("x-forwarded-navident", navIdent) }
+            .flatMap { navIdent ->
+                val mutatedRequest = exchange.request.mutate()
+                    .header("x-forwarded-navident", navIdent)
+                    .build()
+                val mutatedExchange = exchange.mutate().request(mutatedRequest).build()
+                chain.filter(mutatedExchange)
             }
-            .then(chain.filter(exchange))
     }
 
     override fun getOrder(): Int {
