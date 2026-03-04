@@ -47,6 +47,7 @@ class SecurityConfiguration {
                 .pathMatchers("/psak/internal/selftest").permitAll()
                 .pathMatchers("/actuator/health/**").permitAll()
                 .pathMatchers("/actuator/prometheus/**").permitAll()
+                .pathMatchers("/psak/actuator/**").permitAll()
                 .anyExchange().authenticated()
         }
 
