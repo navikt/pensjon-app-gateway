@@ -20,7 +20,8 @@ class GatewayConfig(
             .route("unfiltered_paths") { route ->
                 route.path(
                     "/psak/internal/selftest",
-                    "/psak/actuator/**"
+                    "/psak/actuator/health/**",
+                    "/psak/actuator/prometheus/**"
                 )
                     .uri(remote)
             }
