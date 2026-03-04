@@ -1,8 +1,7 @@
 package no.nav.pensjon.gateway.pensjonazureadappgateway
 
+import org.springframework.cloud.gateway.filter.GatewayFilter
 import org.springframework.cloud.gateway.filter.GatewayFilterChain
-import org.springframework.cloud.gateway.filter.GlobalFilter
-import org.springframework.core.Ordered
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.stereotype.Component
@@ -11,7 +10,7 @@ import reactor.core.publisher.Mono
 
 
 @Component
-class NavIdentFilter : GlobalFilter, Ordered {
+class NavIdentFilter : GatewayFilter {
 
     override fun filter(exchange: ServerWebExchange, chain: GatewayFilterChain): Mono<Void> {
         return fetchNAVident()
@@ -29,9 +28,6 @@ class NavIdentFilter : GlobalFilter, Ordered {
             .switchIfEmpty(chain.filter(exchange))
     }
 
-    override fun getOrder(): Int {
-        return -1
-    }
 
     private fun fetchNAVident(): Mono<String> {
         return ReactiveSecurityContextHolder.getContext()
