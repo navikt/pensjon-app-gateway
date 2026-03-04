@@ -17,8 +17,11 @@ class GatewayConfig(
     @Bean
     fun customRouteLocator(builder: RouteLocatorBuilder): RouteLocator {
         return builder.routes()
-            .route("internal_selftest") { route ->
-                route.path("/psak/internal/selftest")
+            .route("unfiltered_paths") { route ->
+                route.path(
+                    "/psak/internal/selftest",
+                    "/psak/actuator/**"
+                )
                     .uri(remote)
             }
             .route("secured_route") { route ->
