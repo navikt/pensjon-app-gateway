@@ -25,7 +25,6 @@ class NavIdentFilter : GatewayFilter {
                     chain.filter(exchange)
                 }
             }
-           // .switchIfEmpty(chain.filter(exchange))
     }
 
 
