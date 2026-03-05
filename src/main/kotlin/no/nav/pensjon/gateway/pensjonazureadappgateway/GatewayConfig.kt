@@ -11,20 +11,26 @@ import org.springframework.context.annotation.Configuration
 class GatewayConfig(
     @param:Value("\${REMOTE}")
     val remote: String,
+    val navIdentFilter: NavIdentFilter,
     val jitFilter: JitFilter
 ) {
 
     @Bean
     fun customRouteLocator(builder: RouteLocatorBuilder): RouteLocator {
         return builder.routes()
-            .route("internal_selftest") { route ->
-                route.path("/psak/internal/selftest")
+            .route("unfiltered_paths") { route ->
+                route.path(
+                    "/psak/internal/selftest",
+                    "/psak/actuator/health/**",
+                    "/psak/actuator/prometheus/**"
+                )
                     .uri(remote)
             }
             .route("secured_route") { route ->
                 route.path("/**")
                     .filters { filterSpec ->
                         filterSpec.filter(PreserveHostHeaderGatewayFilterFactory().apply())
+                        filterSpec.filter(navIdentFilter)
                         filterSpec.filter(jitFilter)
                     }
                     .uri(remote)

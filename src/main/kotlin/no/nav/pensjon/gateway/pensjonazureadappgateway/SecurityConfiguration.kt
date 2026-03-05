@@ -45,6 +45,8 @@ class SecurityConfiguration {
         http.authorizeExchange { authorize: ServerHttpSecurity.AuthorizeExchangeSpec ->
             authorize
                 .pathMatchers("/psak/internal/selftest").permitAll()
+                .pathMatchers("/psak/actuator/health/**").permitAll()
+                .pathMatchers("/psak/actuator/prometheus/**").permitAll()
                 .pathMatchers("/actuator/health/**").permitAll()
                 .pathMatchers("/actuator/prometheus/**").permitAll()
                 .anyExchange().authenticated()
