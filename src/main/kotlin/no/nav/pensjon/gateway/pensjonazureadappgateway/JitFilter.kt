@@ -43,11 +43,11 @@ class JitFilter(
 
         return exchange.session.flatMap { session ->
             getOboToken(exchange).flatMap { oboToken ->
-                hasActiveJit(oboToken).flatMap { isActive ->
-                    if (isActive) {
-                        // Bruker har aktiv JIT, slipp gjennom
+                getJitStatus(oboToken).flatMap { jitStatus ->
+                    if (jitStatus.active) {
+                        // Bruker har aktiv JIT, slipp gjennom med begrunnelse-header
                         logger.info("User has active JIT access, proceeding")
-                        chain.filter(exchange)
+                        chain.filter(addBegrunnelseHeader(exchange, jitStatus.reason ?: ""))
                     } else {
                         // Bruker har ikke aktiv JIT, sjekk om begrunnelse er oppgitt
                         val begrunnelse = session.getAttribute<String>(BEGRUNNELSE_SESSION_KEY)
@@ -66,7 +66,7 @@ class JitFilter(
                                     session.attributes.remove(BEGRUNNELSE_SESSION_KEY)
                                     session.attributes.remove(VARIGHET_SESSION_KEY)
                                 }
-                                .then(chain.filter(exchange))
+                                .then(chain.filter(addBegrunnelseHeader(exchange, begrunnelse)))
                         }
                     }
                 }
@@ -75,6 +75,13 @@ class JitFilter(
             logger.error("Error during JIT check, proceeding with request anyway: {}", error.message)
             chain.filter(exchange)
         }
+    }
+
+    private fun addBegrunnelseHeader(exchange: ServerWebExchange, begrunnelse: String): ServerWebExchange {
+        val mutatedRequest = exchange.request.mutate()
+            .header("x-jit-begrunnelse", begrunnelse)
+            .build()
+        return exchange.mutate().request(mutatedRequest).build()
     }
 
     private fun redirectToBegrunnelseForm(exchange: ServerWebExchange): Mono<Void> {
@@ -158,19 +165,19 @@ class JitFilter(
             .then()
     }
 
-    private fun hasActiveJit(accessToken: String): Mono<Boolean> {
+    private fun getJitStatus(accessToken: String): Mono<JitStatusResponse> {
         return webClient.get()
-            .uri("$jitApiUrl/api/jit/active?environment=$environmentName")
+            .uri("$jitApiUrl/api/jit/status?environment=$environmentName")
             .header("Authorization", "Bearer $accessToken")
             .retrieve()
-            .bodyToMono<Boolean>()
-            .defaultIfEmpty(false)
-            .doOnSuccess { active ->
-                logger.info("Checked active JIT status: {}", active)
+            .bodyToMono<JitStatusResponse>()
+            .defaultIfEmpty(JitStatusResponse(active = false))
+            .doOnSuccess { status ->
+                logger.info("Checked JIT status: active={}, reason={}", status?.active, status?.reason)
             }
             .onErrorResume { error ->
-                logger.warn("Failed to check active JIT status, assuming no active JIT: {}", error.message)
-                Mono.just(false)
+                logger.warn("Failed to check JIT status, assuming no active JIT: {}", error.message)
+                Mono.just(JitStatusResponse(active = false))
             }
     }
 
@@ -178,5 +185,10 @@ class JitFilter(
         val access_token: String,
         val token_type: String,
         val expires_in: Int
+    )
+
+    data class JitStatusResponse(
+        val active: Boolean,
+        val reason: String? = null
     )
 }
