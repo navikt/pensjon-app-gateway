@@ -78,8 +78,15 @@ class JitFilter(
     }
 
     private fun addBegrunnelseHeader(exchange: ServerWebExchange, begrunnelse: String): ServerWebExchange {
+        // Sanitere begrunnelse for HTTP-header: fjern linjeskift, kontrolltegn og ugyldige tegn
+        val sanitized = begrunnelse
+            .replace(Regex("[\\r\\n\\t]"), " ")
+            .replace(Regex("[^\\w\\sæøåÆØÅ.,;:!\\-?()]"), "")
+            .replace(Regex("\\s+"), " ")
+            .trim()
+            .take(200)
         val mutatedRequest = exchange.request.mutate()
-            .header("x-jit-begrunnelse", begrunnelse)
+            .header("x-jit-begrunnelse", sanitized)
             .build()
         return exchange.mutate().request(mutatedRequest).build()
     }

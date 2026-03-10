@@ -13,7 +13,10 @@
         Du ber om tilgang til et begrenset miljø. Du trenger å oppgi begrunnelse for tilgangen (minimum 5 tegn).
     </p>
     <label for="begrunnelse">Begrunnelse:</label><br>
-    <textarea autofocus id="begrunnelse" name="begrunnelse" rows="4" cols="50" required minlength="5" maxlength="200"></textarea>
+    <input autofocus type="text" id="begrunnelse" name="begrunnelse" required minlength="5" maxlength="200"
+           pattern="[\w\sæøåÆØÅ.,;:!\-?()]{5,200}"
+           title="Kun bokstaver, tall, mellomrom og vanlige skilletegn (.,;:!-?). Ingen linjeskift eller spesialtegn."
+           style="width: 100%; max-width: 400px; padding: 8px; box-sizing: border-box;">
     <div id="charCount">0 / 200 tegn</div><br>
 
     <label for="varighet">Varighet: <span id="varighetValue">1</span> time(r)</label><br>
@@ -28,8 +31,9 @@
     <button type="submit">Send</button>
 </form>
 <script>
-    // Update character count display
+    // Sanitize input: only allow printable characters safe for HTTP headers
     document.getElementById("begrunnelse").addEventListener("input", function() {
+        this.value = this.value.replace(/[^\w\sæøåÆØÅ.,;:!\-?()]/g, '');
         document.getElementById("charCount").textContent = this.value.length + " / " + this.maxLength + " tegn";
     });
 

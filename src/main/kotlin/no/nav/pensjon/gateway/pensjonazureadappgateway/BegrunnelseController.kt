@@ -32,11 +32,29 @@ class BegrunnelseController {
         @RequestBody request: BegrunnelseRequest,
         exchange: ServerWebExchange
     ): Mono<BegrunnelseResponse> {
+        val sanitized = sanitizeForHttpHeader(request.begrunnelse)
+        if (sanitized.length < 5) {
+            return Mono.just(BegrunnelseResponse(success = false, message = "Begrunnelse må være minst 5 tegn"))
+        }
         return exchange.session.map { session ->
-            session.attributes[JitFilter.BEGRUNNELSE_SESSION_KEY] = request.begrunnelse
+            session.attributes[JitFilter.BEGRUNNELSE_SESSION_KEY] = sanitized
             session.attributes[JitFilter.VARIGHET_SESSION_KEY] = request.varighet
             BegrunnelseResponse(success = true, message = "Begrunnelse lagret")
         }
+    }
+
+    /**
+     * Fjerner tegn som ikke er tillatt i HTTP-headere:
+     * linjeskift, kontroll-tegn, og andre ugyldige tegn.
+     * Beholder kun bokstaver, tall, mellomrom og vanlige skilletegn.
+     */
+    private fun sanitizeForHttpHeader(input: String): String {
+        return input
+            .replace(Regex("[\\r\\n\\t]"), " ")              // Erstatt linjeskift/tab med mellomrom
+            .replace(Regex("[^\\w\\sæøåÆØÅ.,;:!\\-?()]"), "") // Fjern alt annet enn tillatte tegn
+            .replace(Regex("\\s+"), " ")                       // Fjern doble mellomrom
+            .trim()
+            .take(200)
     }
 
     data class BegrunnelseRequest(val begrunnelse: String, val varighet: Int = 1)
