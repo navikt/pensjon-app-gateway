@@ -13,7 +13,8 @@
         Du ber om tilgang til et begrenset miljø. Du trenger å oppgi begrunnelse for tilgangen (minimum 5 tegn).
     </p>
     <label for="begrunnelse">Begrunnelse:</label><br>
-    <textarea autofocus id="begrunnelse" name="begrunnelse" rows="4" cols="50" required></textarea><br><br>
+    <textarea autofocus id="begrunnelse" name="begrunnelse" rows="4" cols="50" required minlength="5" maxlength="200"></textarea>
+    <div id="charCount">0 / 200 tegn</div><br>
 
     <label for="varighet">Varighet: <span id="varighetValue">1</span> time(r)</label><br>
     <input type="range" id="varighet" name="varighet" min="1" max="8" value="1" step="1" style="width: 100%; max-width: 400px;">
@@ -27,6 +28,11 @@
     <button type="submit">Send</button>
 </form>
 <script>
+    // Update character count display
+    document.getElementById("begrunnelse").addEventListener("input", function() {
+        document.getElementById("charCount").textContent = this.value.length + " / " + this.maxLength + " tegn";
+    });
+
     // Update slider value display
     document.getElementById("varighet").addEventListener("input", function() {
         document.getElementById("varighetValue").textContent = this.value;
