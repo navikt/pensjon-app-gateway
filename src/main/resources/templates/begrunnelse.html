@@ -37,6 +37,10 @@
         this.value = this.value.replace(/[^\w\sæøåÆØÅ.,;:!\-?()]/g, '');
         document.getElementById("charCount").textContent = this.value.length + " / " + this.maxLength + " tegn";
         document.getElementById("charWarning").textContent = "";
+        // Auto-check the conditions checkbox once begrunnelse has at least 5 characters
+        if (this.value.length >= 5) {
+            document.getElementById("conditions").checked = true;
+        }
     });
 
     // Update slider value display
