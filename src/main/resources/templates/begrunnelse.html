@@ -10,14 +10,25 @@
 <form id="begrunnelseForm">
     <h2>Fyll ut begrunnelse for tilgang</h2>
     <p>
-        Du ber om tilgang til et begrenset miljø. Du trenger å oppgi begrunnelse for tilgangen (minimum 5 tegn).
+        Du ber om tilgang til et begrenset miljø. Velg en kategori for begrunnelsen og legg eventuelt til en utdypende beskrivelse.
     </p>
-    <label for="begrunnelse">Begrunnelse:</label><br>
-    <input autofocus type="text" id="begrunnelse" name="begrunnelse" required minlength="5" maxlength="200"
-           pattern="[\w\sæøåÆØÅ.,;:!\-?()]{5,200}"
+    <label for="kategori">Kategori:</label><br>
+    <select autofocus id="kategori" name="kategori" required style="width: 100%; max-width: 750px; padding: 8px; box-sizing: border-box;">
+        <option value="" disabled selected>-- Velg kategori --</option>
+        <option value="1 Feilsøking og analyse">1 - Feilsøking og analyse</option>
+        <option value="2 Produksjonsnær kvalitetssikring / generalprøve">2 - Produksjonsnær kvalitetssikring / generalprøve</option>
+        <option value="3 Testing av endringer">3 - Testing av endringer</option>
+        <option value="4 Prepping og etablering av testdata">4 - Prepping og etablering av testdata</option>
+        <option value="5 Integrasjon- og verdikjedetest">5 - Integrasjon- og verdikjedetest</option>
+    </select>
+    <br><br>
+
+    <label for="begrunnelse">Utdypende begrunnelse (valgfritt):</label><br>
+    <input type="text" id="begrunnelse" name="begrunnelse" maxlength="130"
+           pattern="[\w\sæøåÆØÅ.,;:!\-?()]{0,130}"
            title="Kun bokstaver, tall, mellomrom og vanlige skilletegn (.,;:!-?). Ingen linjeskift eller spesialtegn."
            style="width: 100%;max-width: 750px; padding: 8px; box-sizing: border-box;">
-    <div id="charCount" style="margin-top: 6px;">0 / 200 tegn</div>
+    <div id="charCount" style="margin-top: 6px;">0 / 130 tegn</div>
     <div id="charWarning" style="color: #c30000; margin-top: 4px; font-size: 0.9em;"></div><br>
 
     <label for="varighet">Varighet: <span id="varighetValue">1</span> time(r)</label><br>
@@ -37,8 +48,11 @@
         this.value = this.value.replace(/[^\w\sæøåÆØÅ.,;:!\-?()]/g, '');
         document.getElementById("charCount").textContent = this.value.length + " / " + this.maxLength + " tegn";
         document.getElementById("charWarning").textContent = "";
-        // Auto-check the conditions checkbox once begrunnelse has at least 5 characters
-        if (this.value.length >= 5) {
+    });
+
+    // Auto-check the conditions checkbox when a kategori is selected
+    document.getElementById("kategori").addEventListener("change", function() {
+        if (this.value) {
             document.getElementById("conditions").checked = true;
         }
     });
@@ -51,22 +65,25 @@
     document.getElementById("begrunnelseForm").addEventListener("submit", function (event) {
         event.preventDefault();
 
-        const begrunnelse = document.getElementById("begrunnelse").value;
-        if (begrunnelse.length < 5) {
-            document.getElementById("charWarning").textContent = "Begrunnelsen må være minst 5 tegn (" + (5 - begrunnelse.length) + " tegn gjenstår)";
-            document.getElementById("begrunnelse").focus();
+        const begrunnelse = document.getElementById("begrunnelse").value.trim();
+
+        const kategori = document.getElementById("kategori").value;
+        if (!kategori) {
+            alert("Velg en kategori.");
+            document.getElementById("kategori").focus();
             return;
         }
 
         const varighet = document.getElementById("varighet").value;
+        const fullBegrunnelse = begrunnelse ? kategori + ": " + begrunnelse : kategori;
 
-        // Send begrunnelse and varighet to server to store in session
+        // Send begrunnelse, kategori and varighet to server to store in session
         fetch('/pensjon-app-gateway/begrunnelse', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ begrunnelse: begrunnelse, varighet: parseInt(varighet) })
+            body: JSON.stringify({ begrunnelse: fullBegrunnelse, varighet: parseInt(varighet) })
         })
         .then(response => response.json())
         .then(data => {

@@ -33,8 +33,8 @@ class BegrunnelseController {
         exchange: ServerWebExchange
     ): Mono<BegrunnelseResponse> {
         val sanitized = sanitizeForHttpHeader(request.begrunnelse)
-        if (sanitized.length < 5) {
-            return Mono.just(BegrunnelseResponse(success = false, message = "Begrunnelse må være minst 5 tegn"))
+        if (sanitized.isEmpty()) {
+            return Mono.just(BegrunnelseResponse(success = false, message = "Begrunnelse kan ikke være tom"))
         }
         return exchange.session.map { session ->
             session.attributes[JitFilter.BEGRUNNELSE_SESSION_KEY] = sanitized
