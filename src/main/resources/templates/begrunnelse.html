@@ -75,7 +75,8 @@
         }
 
         const varighet = document.getElementById("varighet").value;
-        const fullBegrunnelse = begrunnelse ? kategori + ": " + begrunnelse : kategori;
+        const kategoriUtenNummer = kategori.replace(/^\d+\s+/, '');
+        const fullBegrunnelse = begrunnelse ? kategoriUtenNummer + ": " + begrunnelse : kategoriUtenNummer;
 
         // Send begrunnelse, kategori and varighet to server to store in session
         fetch('/pensjon-app-gateway/begrunnelse', {
