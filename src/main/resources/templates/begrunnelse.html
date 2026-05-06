@@ -46,7 +46,7 @@
 <script>
     // Sanitize input: only allow printable characters safe for HTTP headers
     document.getElementById("begrunnelse").addEventListener("input", function() {
-        this.value = this.value.replace(/[^\w\sæøåÆØÅ.,;:!\-?()]/g, '');
+        this.value = this.value.replace(/[^\w\sæøåÆØÅ.,;:!\-?()\/]/g, '');
         document.getElementById("charCount").textContent = this.value.length + " / " + this.maxLength + " tegn";
         document.getElementById("charWarning").textContent = "";
     });
@@ -79,7 +79,7 @@
         const kategoriUtenNummer = kategori.replace(/^\d+\s+/, '');
         const fullBegrunnelse = begrunnelse ? kategoriUtenNummer + ": " + begrunnelse : kategoriUtenNummer;
 
-        // Send begrunnelse, kategori and varighet to server to store in session
+        // Send full begrunnelse (kategori og begrunnelse), and varighet to server to store in session
         fetch('/pensjon-app-gateway/begrunnelse', {
             method: 'POST',
             headers: {
