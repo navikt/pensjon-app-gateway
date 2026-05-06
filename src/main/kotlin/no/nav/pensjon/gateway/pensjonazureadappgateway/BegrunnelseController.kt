@@ -51,7 +51,7 @@ class BegrunnelseController {
     private fun sanitizeForHttpHeader(input: String): String {
         return input
             .replace(Regex("[\\r\\n\\t]"), " ")              // Erstatt linjeskift/tab med mellomrom
-            .replace(Regex("[^\\w\\sæøåÆØÅ.,;:!\\-?()]"), "") // Fjern alt annet enn tillatte tegn
+            .replace(Regex("[^\\w\\sæøåÆØÅ.,;:!\\-?()/]"), "") // Fjern alt annet enn tillatte tegn
             .replace(Regex("\\s+"), " ")                       // Fjern doble mellomrom
             .trim()
             .take(200)
