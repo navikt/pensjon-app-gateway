@@ -1,9 +1,9 @@
 name: "Build and deploy to nais q0, q1 and q5"
 on:
   workflow_dispatch:
-#  push:
-#    branches:
-#      - "main"
+  push:
+    branches:
+      - "main"
 jobs:
   build:
     name: "build"
