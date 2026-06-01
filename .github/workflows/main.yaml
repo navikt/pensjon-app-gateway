@@ -16,7 +16,7 @@ jobs:
       image: "${{ steps.docker-push.outputs.image }}"
       telemetry: "${{ steps.docker-push.outputs.telemetry }}"
     steps:
-      - uses: "actions/checkout@v4"
+      - uses: "actions/checkout@v6"
       - uses: "actions/setup-java@v4"
         with:
           java-version: "21"
@@ -82,7 +82,7 @@ jobs:
             environment: Q5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: nais/deploy/actions/deploy@v2
         name: "Deploy to NAIS"
         env:
