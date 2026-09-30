@@ -47,7 +47,7 @@ jobs:
 #            azure_ad_group: "8bb9b8d1-f46a-4ade-8ee8-5895eccdf8cf" # Pensjon Saksbehandler
     steps:
       - uses: actions/checkout@v7
-      - uses: nais/deploy/actions/deploy@v2
+      - uses: nais/deploy/actions/deploy@v3
         name: "Deploy to NAIS"
         env:
           CLUSTER: "${{ matrix.cluster }}"
